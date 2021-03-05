@@ -1,18 +1,19 @@
 module.exports = (sequelize, Sequelize) => {
-    const Bonus = sequelize.define("bonuses", {
+    const Deposit = sequelize.define("deposites", {
         userid: {
             type: Sequelize.STRING
         },
-        tinfo: {
+        price: {
             type: Sequelize.STRING
         },
-        bonus: {
+        amount: {
             type: Sequelize.DOUBLE
         },
-        type: {
-            type: Sequelize.STRING
+        txid: {
+            type: Sequelize.STRING,
+            unique: true
         },
-        ref:{
+        status:{
             type: Sequelize.STRING
         },
     },
@@ -21,5 +22,5 @@ module.exports = (sequelize, Sequelize) => {
       collate: 'euckr_bin',
     });
   
-    return Bonus;
+    return Deposit;
   };  

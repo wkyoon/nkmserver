@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
     const Order = sequelize.define("orders", {
-        usertbid: {
+        userid: {
             type: Sequelize.STRING
         },
         price: {
