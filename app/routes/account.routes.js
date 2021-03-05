@@ -18,5 +18,9 @@ module.exports = function(app) {
 
   app.post("/api/account/modify", controller.modify);
 
+  app.post("/api/account/changepassword", controller.changepassword);
+
+  app.post("/api/account/changepin", controller.changepin);
+
   
 };

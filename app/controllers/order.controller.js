@@ -34,7 +34,7 @@ exports.orderlistbyuser = async (req, res) => {
         }
 
         const orders = await Order.findAll({
-            where: { usertbid: uuid },
+            where: { userid: user.id },
             order: [['createdAt', 'DESC']],
             logging:false
         })
@@ -79,7 +79,7 @@ exports.buypackage = async (req, res) => {
         }
 
         const neworder = {
-            usertbid:uuid,
+            userid:user.id,
             price,
             amount,
             txid,

@@ -27,7 +27,9 @@ db.sequelize = sequelize;
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.setting = require("../models/setting.model.js")(sequelize, Sequelize);
 db.order = require("../models/order.model.js")(sequelize, Sequelize);
+db.deposit = require("../models/deposit.model.js")(sequelize, Sequelize);
 db.bonus = require("../models/bonus.model.js")(sequelize, Sequelize);
+db.withdraw = require("../models/withdraw.model.js")(sequelize, Sequelize);
 
 
 

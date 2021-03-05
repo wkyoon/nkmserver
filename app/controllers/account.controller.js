@@ -8,7 +8,7 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 
 exports.me = async (req, res) => {
-    console.log('me');
+    //console.log('me');
     try {
         const { authorization } = req.headers;
 
@@ -231,5 +231,74 @@ exports.modify = async (req, res) => {
   
 
     
+
+};
+
+
+exports.changepassword = async (req, res) => {
+    console.log('account changepassword', req.body);
+
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+        return res.status(401).send({
+            message: 'Authorization token missing',
+        });
+    }
+
+    const accessToken = authorization.split(' ')[1];
+    const { uuid } = jwt.verify(accessToken, config.secret);
+    const user = await User.findOne({
+        where: { uuid: uuid },
+        raw: true,
+    });
+
+    if (!user) {
+        return res.status(400).send({ message: 'Invalid authorization token' });
+    }
+    else
+    {
+        const { password } = req.body;
+        // update user 
+        await User.update({password:password},{where:{uuid:uuid}});
+        
+        return res.send(
+            { message: 'Password change success' }
+        )
+    }
+
+};
+
+exports.changepin = async (req, res) => {
+    console.log('account changepin', req.body);
+
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+        return res.status(401).send({
+            message: 'Authorization token missing',
+        });
+    }
+
+    const accessToken = authorization.split(' ')[1];
+    const { uuid } = jwt.verify(accessToken, config.secret);
+    const user = await User.findOne({
+        where: { uuid: uuid },
+        raw: true,
+    });
+
+    if (!user) {
+        return res.status(400).send({ message: 'Invalid authorization token' });
+    }
+    else
+    {
+        const { password } = req.body;
+        // update user 
+        await User.update({pin:password},{where:{uuid:uuid}});
+        
+        return res.send(
+            { message: 'Pin change success' }
+        )
+    }
 
 };

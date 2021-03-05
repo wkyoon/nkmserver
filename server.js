@@ -40,6 +40,9 @@ require('./app/routes/account.routes')(app);
 require('./app/routes/setting.routes')(app);
 require('./app/routes/order.routes')(app);
 require('./app/routes/bonus.routes')(app);
+require('./app/routes/deposit.routes')(app);
+require('./app/routes/recommender.routes')(app);
+require('./app/routes/withdraw.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3001;

@@ -24,7 +24,10 @@ exports.nkminfo = async (req, res) => {
     return res.send({
         nkminfo: {
             price: '0.0471667',
-            address:'0x4Affd11931A27123876d64e05da6B7c043Bbb118'
+            address:'0x4Affd11931A27123876d64e05da6B7c043Bbb118',
+            withdraw_fee:'5',
+            spointprice:'0.00083'
+            
         },
     });
 };
