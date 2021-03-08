@@ -11,7 +11,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         txid: {
             type: Sequelize.STRING,
-            unique: true
+        },
+        buytype:{
+            type: Sequelize.STRING
         },
         status:{
             type: Sequelize.STRING

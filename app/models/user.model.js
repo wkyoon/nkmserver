@@ -36,6 +36,12 @@ module.exports = (sequelize, Sequelize) => {
     sponsorcount: {
       type: Sequelize.INTEGER
     },
+    buytype: {
+      type: Sequelize.STRING
+    },
+    packageId: {
+      type: Sequelize.INTEGER
+    },
     balance: {
       type: Sequelize.INTEGER
     },

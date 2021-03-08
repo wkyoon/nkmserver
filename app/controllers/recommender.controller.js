@@ -3,9 +3,11 @@ const db = require('../models');
 const config = require('../config/auth.config');
 const User = db.user;
 const Op = db.Sequelize.Op;
+const SponsorTree = require('../util/SponsorTree');
 
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
+var dateFormat = require('dateformat');
 
 exports.byuser = async (req, res) => {
     console.log('byuser');
@@ -33,39 +35,86 @@ exports.byuser = async (req, res) => {
             return res.status(400).send({ message: 'Invalid authorization token' });
         }
 
-        return res.send({
-            recommenders: 
-                [
-                    {
-                      id: 1,
-                      tags: ['A'],
-                      name: 'Vicwic(이찬원)',
-                      title: '매출 1000',
-                      regdate: '등록날짜 2021-03-05',
-                      memo: ''
-                    },
-                    {
-                      id: 2,
-                      tags: ['B'],
-                      pid: 1,
-                      name: 'Name2',
-                      title: 'Tytle2',
-                      regdate: '2021-03-01',
-                      memo: 'abc'
-                    },
-                    {
-                      id: 3,
-                      tags: ['B'],
-                      pid: 1,
-                      name: 'Name3',
-                      title: 'Tytle3',
-                      regdate: '2021-03-01',
-                      memo: 'abc'
-                    }
-                  ]
+        const sponsortree = await SponsorTree.SponsorTree(user.id);
+        //console.log('sponsortree',sponsortree)
+        const { currentuser, sponsorinfo } = sponsortree;
+        const childrentemp = [];
+        childrentemp.push(currentuser);
+    
+
+        if (sponsorinfo != null) {
+            for (let i = 0; i < sponsorinfo.children.length; i++) {
+                childrentemp.push(sponsorinfo.children[i].data);
+            }
+        }
+    
+        console.log('childrentemp,',childrentemp)
+
+        recommenders=[]
+        for(let i = 0 ; i < childrentemp.length;i++)
+        {
+            //console.log(childrentemp[i].createdAt)
+            let day=dateFormat(childrentemp[i].createdAt, "yyyy-mm-dd");
+            //console.log(day)
+            recommenders.push(
+                {
+                    id: childrentemp[i].id,
+                    tags: ['A'],
+                    name: childrentemp[i].userid + '/' + childrentemp[i].username,
+                    title: '매출 ',
+                    regdate: '등록날짜 '+day,
+                    memo: '',
+                    pid: childrentemp[i].parentId
+
+                }
+            )
+        }
+
+        return res.send({recommenders:recommenders})
+
+        // return res.send({
+        //     recommenders: 
+        //         [
+        //             {
+        //               id: 1,
+        //               tags: ['A'],
+        //               name: 'Vicwic(이찬원)',
+        //               title: '매출 1000',
+        //               regdate: '등록날짜 2021-03-05',
+        //               memo: ''
+        //             },
+        //             {
+        //               id: 2,
+        //               tags: ['B'],
+        //               pid: 1,
+        //               name: 'Name2',
+        //               title: 'Tytle2',
+        //               regdate: '2021-03-01',
+        //               memo: 'abc'
+        //             },
+        //             {
+        //               id: 3,
+        //               tags: ['B'],
+        //               pid: 2,
+        //               name: 'Name3',
+        //               title: 'Tytle3',
+        //               regdate: '2021-03-01',
+        //               memo: 'abc'
+        //             },
+        //             {
+        //                 id: 4,
+        //                 tags: ['B'],
+        //                 pid: 2,
+        //                 name: 'Name4',
+        //                 title: 'Tytle4',
+        //                 regdate: '2021-03-01',
+        //                 memo: 'abc'
+        //               }
+  
+        //           ]
 
             
-        })
+        // })
 
     } catch (err) {
         console.error(err);

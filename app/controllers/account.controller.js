@@ -121,7 +121,7 @@ exports.login = async (req, res) => {
 exports.register = async (req, res) => {
     console.log('register', req.body);
 
-    const { userid, sponsorid, password } = req.body;
+    const { userid, sponsorid, password,phone,name } = req.body;
 
     const user = await User.findOne({
         where: { userid: userid },
@@ -156,8 +156,19 @@ exports.register = async (req, res) => {
         userid,
         sponsorid,
         password,
+        phone,
+        name,
         parentId:parentId,
         role: 'user',
+        centerId: 1,
+        sponsorcount: 0,
+        balance: '0',
+        maxbonus: '0',
+        remainderbonus: '0',
+        bonus: '0',
+        recover : '0',
+        withdrawable : '0',
+        spoint : '0'
     };
 
     await User.create(newuser);
@@ -168,13 +179,7 @@ exports.register = async (req, res) => {
 
     return res.send({
         accessToken,
-        user: {
-            id: newuser.id,
-            uuid: newuser.uuid,
-            userid: newuser.userid,
-            sponsorid: newuser.sponsorid,
-
-          }
+        user: newuser
     })
     
 

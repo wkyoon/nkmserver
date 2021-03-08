@@ -1,5 +1,7 @@
 const controller = require("../controllers/order.controller");
 
+const basepath = '/api/orders/'
+
 module.exports = function(app) {
   app.use(function(req, res, next) {
     res.header(
@@ -15,5 +17,11 @@ module.exports = function(app) {
   //client buypackage
   app.post("/api/order/buypackage", controller.buypackage);
 
+
+  app.get(basepath, controller.findAll);
+
+  app.put(basepath+"update", controller.update);
+
+  app.post(basepath+"remove", controller.delete);
   
 };
