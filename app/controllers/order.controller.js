@@ -23,24 +23,26 @@ exports.orderlistbyuser = async (req, res) => {
 
         const accessToken = authorization.split(' ')[1];
         const { uuid } = jwt.verify(accessToken, config.secret);
-        
+
         const user = await User.findOne({
             where: { uuid: uuid },
             raw: true,
         });
 
         if (!user) {
-            return res.status(400).send({ message: 'Invalid authorization token' });
+            return res
+                .status(400)
+                .send({ message: 'Invalid authorization token' });
         }
 
         const orders = await Order.findAll({
-            where: { userid: user.id },
+            where: { userid: user.userid },
             order: [['createdAt', 'DESC']],
-            logging:false
-        })
+            logging: false,
+        });
 
-        return res.send({orders});
-    
+        console.log('orders', orders);
+        return res.send({ orders });
     } catch (err) {
         console.error(err);
         return res.status(500).send({
@@ -49,14 +51,12 @@ exports.orderlistbyuser = async (req, res) => {
     }
 };
 
-
-
 exports.buypackage = async (req, res) => {
     console.log('buypackage', req.body);
 
     try {
         const { authorization } = req.headers;
-        const {price,amount,txid} = req.body;
+        const { price, amount, txid } = req.body;
 
         if (!authorization) {
             return res.status(401).send({
@@ -67,36 +67,167 @@ exports.buypackage = async (req, res) => {
         const accessToken = authorization.split(' ')[1];
         console.log(accessToken);
         const { uuid } = jwt.verify(accessToken, config.secret);
-        console.log('uuid',uuid);
-        
+        console.log('uuid', uuid);
+
         const user = await User.findOne({
             where: { uuid: uuid },
             raw: true,
         });
 
         if (!user) {
-            return res.status(400).send({ message: 'Invalid authorization token' });
+            return res
+                .status(400)
+                .send({ message: 'Invalid authorization token' });
         }
 
         const neworder = {
-            userid:user.id,
+            userid: user.userid,
             price,
             amount,
             txid,
-            status:'request'
+            buytype: 'new',
+            status: 'request',
         };
 
-        
-        await Order.create(neworder)
+        await Order.create(neworder);
 
         return res.send({
-            message: 'Order request success'
+            message: 'Order request success',
         });
-    
     } catch (err) {
         console.error(err);
         return res.status(500).send({
             message: 'Internal server error',
         });
     }
+};
+
+// call from admin
+exports.findAll = (req, res) => {
+    console.log('---- Order FindAll ---- GET');
+    const query = req.query.id;
+    console.log('query', query);
+
+    //  var condition = query ? { username: { [Op.like]: `%${query}%` } } : null;
+
+    if (query === 'all') {
+        Order.findAll({
+            order: [['createdAt', 'DESC']],
+            logging: false,
+        })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    } else if (query === 'request') {
+        Order.findAll({
+            where: { status: 'request' },
+            order: [['createdAt', 'DESC']],
+            logging: false,
+        })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    } else if (query === 'active') {
+        Order.findAll({
+            where: { status: 'active' },
+            order: [['createdAt', 'DESC']],
+            logging: false,
+        })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    }
+};
+
+// call from admin
+exports.update = async (req, res) => {
+    const { id, userid, price, buytype, status } = req.body.order;
+    console.log('----------update from admin --------------', req.body.order);
+
+    // update user infom
+    const user = await User.findOne({ where: { userid: userid }, raw: true });
+
+    if (status === 'request') {
+        await User.update(
+            { buytype: 'idle', balance: 0 },
+            { where: { id: user.id } }
+        );
+    } else if (status === 'active') {
+
+        const maxbonus = price * 2;
+        const remainderbonus = maxbonus
+
+
+        if (buytype === 'new') {
+            await User.update(
+                { buytype: buytype, balance: price,maxbonus:maxbonus,remainderbonus:remainderbonus },
+                { where: { id: user.id } }
+            );
+        } else if (buytype === 'injung') {
+            await User.update(
+                { buytype: buytype, balance: price,maxbonus:maxbonus,remainderbonus:remainderbonus },
+                { where: { id: user.id } }
+            );
+        }
+    }
+
+    await Order.update(
+        {
+            price: price,
+            buytype: buytype,
+            status: status,
+        },
+        {
+            where: { id: id },
+            raw: true,
+        }
+    );
+
+    res.send({ message: 'ok' });
+};
+
+exports.delete = (req, res) => {
+    console.log(req.body);
+    const id = req.body.Ids;
+
+    Order.destroy({
+        where: { id: id },
+    })
+        .then((num) => {
+            if (num == 1) {
+                res.send({
+                    message: 'Order was deleted successfully!',
+                });
+            } else {
+                res.send({
+                    message: `Cannot delete Order with id=${id}. Maybe Tutorial was not found!`,
+                });
+            }
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: 'Could not delete Tutorial with id=' + id,
+            });
+        });
 };

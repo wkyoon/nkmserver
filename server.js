@@ -5,7 +5,8 @@ const cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:3000"
+  origin: "http://localhost:3000",
+  origin: "http://localhost:3002"
 };
 
 app.use(cors(corsOptions));
@@ -43,6 +44,15 @@ require('./app/routes/bonus.routes')(app);
 require('./app/routes/deposit.routes')(app);
 require('./app/routes/recommender.routes')(app);
 require('./app/routes/withdraw.routes')(app);
+
+require('./app/routes/admin.routes')(app);
+require('./app/routes/notice.routes')(app);
+require('./app/routes/center.routes')(app);
+
+require('./app/routes/members.routes')(app);
+require('./app/routes/package.routes')(app);
+
+require('./app/routes/sponsor.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3001;

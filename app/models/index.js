@@ -32,5 +32,16 @@ db.bonus = require("../models/bonus.model.js")(sequelize, Sequelize);
 db.withdraw = require("../models/withdraw.model.js")(sequelize, Sequelize);
 
 
+db.admin = require("../models/admin.model.js")(sequelize, Sequelize);
+db.notice = require("../models/notice.model.js")(sequelize, Sequelize);
+db.center = require("../models/center.model.js")(sequelize, Sequelize);
+
+db.package = require("../models/package.model.js")(sequelize, Sequelize);
+
+
+// Relations
+
+db.user.belongsTo(db.center, { foreignKey: 'centerId',targetKey:'id'});
+
 
 module.exports = db;
