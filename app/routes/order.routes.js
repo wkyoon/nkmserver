@@ -20,6 +20,8 @@ module.exports = function(app) {
 
   app.get(basepath, controller.findAll);
 
+  app.post(basepath+'add',controller.create);
+
   app.put(basepath+"update", controller.update);
 
   app.post(basepath+"remove", controller.delete);

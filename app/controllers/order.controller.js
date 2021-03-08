@@ -102,6 +102,33 @@ exports.buypackage = async (req, res) => {
     }
 };
 
+exports.create = (req, res) => {
+    console.log(req.body.order);
+
+    // Create a 
+    const order = {
+        userid: req.body.order.userid,
+        price: req.body.order.price,
+        txid: req.body.order.txid,
+        buytype: 'new',
+        status: 'request',
+    };
+
+    Order.create(order)
+        .then((newOrder) => {
+            res.send({ newOrder });
+        })
+        .catch((err) => {
+            console.log(err)
+            res.status(500).send({
+                message:
+                    err.message ||
+                    'Some error occurred while creating the Tutorial.',
+            });
+        });
+};
+
+
 // call from admin
 exports.findAll = (req, res) => {
     console.log('---- Order FindAll ---- GET');
