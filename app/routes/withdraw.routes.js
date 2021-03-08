@@ -1,5 +1,7 @@
 const controller = require("../controllers/withdraw.controller");
 
+const basepath = '/api/withdraws/'
+
 module.exports = function(app) {
   app.use(function(req, res, next) {
     res.header(
@@ -15,4 +17,8 @@ module.exports = function(app) {
   //client listbyuser
   app.get("/api/withdraw/listbyuser", controller.listbyuser);
   
+
+  app.get(basepath, controller.findAll);
+  app.put(basepath+"update", controller.update);
+
 };

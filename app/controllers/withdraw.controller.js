@@ -38,7 +38,7 @@ exports.listbyuser = async (req, res) => {
         }
 
         const withdraws = await Withdraw.findAll({
-            where: { userid: user.id, type: type },
+            where: { userid: user.userid, type: type },
             order: [['createdAt', 'DESC']],
             logging: false,
         });
@@ -68,8 +68,6 @@ exports.requestbyuser = async (req, res) => {
             type,
         } = req.body;
 
-        
-
         if (!authorization) {
             return res.status(401).send({
                 message: 'Authorization token missing',
@@ -91,7 +89,7 @@ exports.requestbyuser = async (req, res) => {
         }
 
         const newwithdraw = {
-            userid: user.id,
+            userid: user.userid,
             usd: usd,
             nkmprice: nkmprice,
             nkmamount: nkmamount,
@@ -102,37 +100,125 @@ exports.requestbyuser = async (req, res) => {
             status: 'request',
         };
 
+        // pin code request  if exist
+        console.log('pin', user.pin);
 
-        // pin code request  if exist 
-        console.log('pin',user.pin)
-
-        if(user.pin !==null)
-        {
-            console.log('step 1')
-            if(user.pin === pin )
-            {
-                console.log('step 2')
+        if (user.pin !== null) {
+            console.log('step 1');
+            if (user.pin === pin) {
+                console.log('step 2');
                 await Withdraw.create(newwithdraw);
             }
-        }
-        else
-        {
-            console.log('step 3')
-    
+        } else {
+            console.log('step 3');
+
             await Withdraw.create(newwithdraw);
-
         }
-
-        
 
         return res.send({
             message: 'Withdraw request success',
         });
-
     } catch (err) {
         console.error(err);
         return res.status(500).send({
             message: 'Internal server error',
         });
     }
+};
+
+exports.findAll = (req, res) => {
+    console.log('---------------------- withdraw findall GET ADMIN');
+    //console.log(req.query.id);
+    const query = req.query.id;
+    console.log(query);
+    //var condition = query ? { username: { [Op.like]: `%${query}%` } } : null;
+
+    if (query === 'all') {
+        Withdraw.findAll({ order: [['createdAt', 'DESC']] })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    } else if (query === 'request') {
+        Withdraw.findAll({
+            where: { status: 'request' },
+            order: [['createdAt', 'DESC']],
+        })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    } else if (query === 'confirm') {
+        Withdraw.findAll({
+            where: { status: 'confirm' },
+            order: [['createdAt', 'DESC']],
+        })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    } else if (query === 'cancel') {
+        Withdraw.findAll({
+            where: { status: 'cancel' },
+            order: [['createdAt', 'DESC']],
+        })
+            .then((items) => {
+                res.send({ items });
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while retrieving tutorials.',
+                });
+            });
+    }
+};
+
+exports.update = async (req, res) => {
+    console.log('withdraw update---------------------- admin POST');
+    console.log(req.body);
+
+    const { id, status } = req.body.withdraw;
+
+    const orgwithdraw = await Withdraw.findByPk(id);
+
+    if (orgwithdraw.status === status) {
+        res.send({
+            message: 'nothing change',
+        });
+    } else {
+        if (orgwithdraw.status === 'confirm') {
+            // request
+        } else if (status === 'cancel') {
+        }
+        await Withdraw.update(
+            {
+                status: status,
+            },
+            {
+                where: { id: id },
+                raw: true,
+            });
+        }
+    
+    res.send({ message: 'ok' });
 };
