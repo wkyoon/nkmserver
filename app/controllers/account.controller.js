@@ -151,8 +151,10 @@ exports.register = async (req, res) => {
 
     console.log('register step 2');
 
+    const uuid = uuidv4();
+
     const newuser = {
-        uuid: uuidv4(),
+        uuid: uuid,
         userid,
         sponsorid,
         password,
@@ -161,7 +163,10 @@ exports.register = async (req, res) => {
         parentId:parentId,
         role: 'user',
         centerId: 1,
+        centername:'본사',
         sponsorcount: 0,
+        volume:'0',
+        injung:'0',
         balance: '0',
         maxbonus: '0',
         remainderbonus: '0',
@@ -173,7 +178,7 @@ exports.register = async (req, res) => {
 
     await User.create(newuser);
 
-    const accessToken = jwt.sign({ uuid: newuser.uuid }, config.secret, {
+    const accessToken = jwt.sign({ uuid: uuid }, config.secret, {
         expiresIn: 86400,
     });
 

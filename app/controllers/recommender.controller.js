@@ -10,7 +10,7 @@ var bcrypt = require('bcryptjs');
 var dateFormat = require('dateformat');
 
 exports.byuser = async (req, res) => {
-    console.log('byuser');
+    console.log('recommender byuser');
     try {
         const { authorization } = req.headers;
 
@@ -23,7 +23,7 @@ exports.byuser = async (req, res) => {
         const accessToken = authorization.split(' ')[1];
         //console.log(accessToken);
         const { uuid } = jwt.verify(accessToken, config.secret);
-        //console.log('uuid',uuid);
+        console.log('uuid',uuid);
         
         const user = await User.findOne({
             where: { uuid: uuid },
