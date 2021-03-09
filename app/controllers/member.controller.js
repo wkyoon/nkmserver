@@ -1,10 +1,60 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require('../models');
+const config = require('../config/auth.config');
 const Member = db.user;
 const Settings = db.setting;
 const Center = db.center;
+const Order = db.order;
 const Op = db.Sequelize.Op;
 
+var SponsorInfo = require('../util/SponsorInfo');
 var dateFormat = require('dateformat');
+
+async function updateSponsorCnt() {
+    console.log('------------------> start updateSponsorCnt ');
+    // ---------------------------------------------
+
+    var rootNodes = [];
+    var childrenNodes = [];
+
+    // update all user recommender and sponsor tree
+    const alluser = await Member.findAll({
+        attributes: [
+            'id',
+            'userid',
+            'name',
+            'sponsorid',
+            'parentId',
+            'sponsorcount',
+            'createdAt',
+        ],
+        raw: true,
+        logging: false,
+    });
+
+    for (i = 0; i < alluser.length; i++) {
+        if (alluser[i].parentId > 0) {
+            childrenNodes.push(alluser[i]);
+        } else {
+            rootNodes.push(alluser[i]);
+        }
+    }
+
+    for (let i = 0; i < alluser.length; i++) {
+        let a = new SponsorInfo(childrenNodes, alluser[i].id);
+
+        let sponsorinfo = await a.getSponsorInfo();
+
+        await Member.update(
+            {
+                sponsorcount: Number(sponsorinfo.length),
+            },
+            { where: { id: alluser[i].id }, logging: false }
+        );
+    }
+    // ---------------------------------------------
+    console.log('------------------> end updateSponsorCnt ');
+}
 
 const getPagination = (page, size) => {
     const limit = size ? +size : 10;
@@ -26,7 +76,7 @@ exports.create = async (req, res) => {
     const { member } = req.body;
 
     const user = await Member.findOne({
-        where: { username: member.username },
+        where: { userid: member.userid },
         raw: true,
     });
 
@@ -35,64 +85,43 @@ exports.create = async (req, res) => {
         return;
     }
 
-    const spuser = await Member.findOne({
-        where: { username: member.sponsor },
-        raw: true,
-    });
-
-    const rcuser = await Member.findOne({
-        where: { username: member.recommender },
-        raw: true,
-    });
-
-    const center = await Centers.findByPk(member.centerid, { raw: true });
-
-    if (spuser && rcuser) {
+    if (member.sponsorid === 'admin') {
         const newmember = {
-            username: member.username,
-            nickname: member.nickname,
-            recommender: member.recommender,
-            sponsor: member.sponsor,
-            parentId: spuser.id,
-            phoneno: member.phoneno,
+            userid: member.userid,
+            uuid: uuidv4(),
+            name: member.name,
+            sponsorid: member.sponsorid,
+            phone: member.phone,
             email: member.email,
             password: member.password,
-        };
-        await Member.create(newmember);
-    } else if (spuser) {
-        const newmember = {
-            username: member.username,
-            nickname: member.nickname,
-            sponsor: member.sponsor,
-            parentId: spuser.id,
-            phoneno: member.phoneno,
-            email: member.email,
-            password: member.password,
-        };
-        await Member.create(newmember);
-    } else if (rcuser) {
-        const newmember = {
-            username: member.username,
-            nickname: member.nickname,
-            recommender: member.recommender,
-            phoneno: member.phoneno,
-            email: member.email,
-            password: member.password,
+            centerid: member.centerid,
+            centername: member.centername,
         };
         await Member.create(newmember);
     } else {
-        const newmember = {
-            username: member.username,
-            nickname: member.nickname,
-            phoneno: member.phoneno,
-            email: member.email,
-            password: member.password,
-        };
-        await Member.create(newmember);
+        const spuser = await Member.findOne({
+            where: { userid: member.sponsorid },
+            raw: true,
+        });
+
+        if (spuser) {
+            const newmember = {
+                userid: member.userid,
+                uuid: uuidv4(),
+                name: member.name,
+                sponsorid: member.sponsorid,
+                phone: member.phone,
+                email: member.email,
+                password: member.password,
+                centerid: member.centerid,
+                centername: member.centername,
+                parentId: spuser.id,
+            };
+            await Member.create(newmember);
+        }
     }
 
-    await updateRecommenderCntAndSponsorCnt();
-    console.log('------------------------------> before res send');
+    await updateSponsorCnt();
 
     res.send({ message: 'ok' });
 };
@@ -266,7 +295,7 @@ exports.update = (req, res) => {
         phone: member.phone,
         email: member.email,
         password: member.password,
-        centerid: member.centerid
+        centerid: member.centerid,
     };
 
     Member.update(newmember, {
@@ -292,6 +321,76 @@ exports.update = (req, res) => {
                 message: 'Error updating Member with id=' + id,
             });
         });
+};
+
+exports.updatepackage = async (req, res) => {
+    const { member } = req.body;
+
+    console.log('updatepackage ', member);
+
+    let balance, maxbonus,buytype,volume,injung;
+    if (member.volume > 0) {
+        balance = member.volume;
+        volume = member.volume;
+        injung = 0;
+        buytype = 'new'
+    } else {
+        balance = member.injung;
+        volume = 0;
+        injung = member.injung;
+        buytype = 'injung'
+    }
+
+    maxbonus = balance * 2;
+
+    const newmember = {
+        buytype:buytype,
+        volume: member.volume,
+        injung: member.injung,
+        balance: balance,
+        maxbonus: maxbonus,
+        remainderbonus: maxbonus,
+        bonus: 0,
+        bonus_daily: 0,
+        bonus_matching: 0,
+        recovery: 0,
+        withdrawable: 0,
+        spoint: 0,
+    };
+
+    await Member.update(newmember, {
+        where: { id: member.id },
+        raw: true,
+    });
+
+    // find order list 
+    const order = await Order.findOne({
+        where: { userid: member.userid },
+        raw: true,
+    });
+
+    if(!order)
+    {
+        const neworder = {
+            userid: member.userid,
+            price:balance,
+            buytype: buytype,
+            status: 'active',
+        };
+        await Order.create(neworder);
+    }
+    else
+    {
+        const neworder = {
+            price:balance,
+            buytype: buytype,
+            status: 'active',
+        };
+        await Order.update(neworder,{ where: { id: order.id },
+            raw: true});
+    }
+
+    return res.send({ message: 'Member was updated successfully.' });
 };
 
 exports.togglestar = async (req, res) => {

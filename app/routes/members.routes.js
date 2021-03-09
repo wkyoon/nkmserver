@@ -18,6 +18,8 @@ module.exports = function (app) {
     // Update
     app.post(basepath + 'update', members.update);
 
+    app.post(basepath + 'updatepackage', members.updatepackage);
+
     // Delete
     app.post(basepath + 'delete', members.delete);
 

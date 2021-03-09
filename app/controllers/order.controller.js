@@ -80,20 +80,38 @@ exports.buypackage = async (req, res) => {
                 .send({ message: 'Invalid authorization token' });
         }
 
-        const neworder = {
-            userid: user.userid,
-            price,
-            amount,
-            txid,
-            buytype: 'new',
-            status: 'request',
-        };
-
-        await Order.create(neworder);
-
-        return res.send({
-            message: 'Order request success',
+        // find order 
+        const preorder = await Order.findOne({
+            where: { userid: member.userid },
+            raw: true,
         });
+
+        if(!preorder)
+        {
+            const neworder = {
+                userid: user.userid,
+                price,
+                amount,
+                txid,
+                buytype: 'new',
+                status: 'request',
+            };
+    
+            await Order.create(neworder);
+            return res.send({
+                message: 'Order request success',
+            });
+    
+        }
+        else
+        {
+            return res.status(400).send({
+                message: 'Order request fail',
+            });
+    
+        }
+        
+
     } catch (err) {
         console.error(err);
         return res.status(500).send({
@@ -208,12 +226,33 @@ exports.update = async (req, res) => {
 
         if (buytype === 'new') {
             await User.update(
-                { buytype: buytype, balance: price,maxbonus:maxbonus,remainderbonus:remainderbonus },
+                { buytype: buytype, 
+                    balance: price,
+                    volume:price,
+                    injung:'0',
+                    maxbonus:maxbonus,
+                    remainderbonus:remainderbonus,
+                    bonus: 0,
+                    bonus_daily: 0,
+                    bonus_matching: 0,
+                    recovery: 0,
+                    withdrawable: 0,
+                    spoint: 0, },
                 { where: { id: user.id } }
             );
         } else if (buytype === 'injung') {
             await User.update(
-                { buytype: buytype, balance: price,maxbonus:maxbonus,remainderbonus:remainderbonus },
+                { buytype: buytype, 
+                    balance: price,
+                    volume:'0',
+                    injung:price,
+                    maxbonus:maxbonus,remainderbonus:remainderbonus ,
+                    bonus: 0,
+                    bonus_daily: 0,
+                    bonus_matching: 0,
+                    recovery: 0,
+                    withdrawable: 0,
+                    spoint: 0,},
                 { where: { id: user.id } }
             );
         }
