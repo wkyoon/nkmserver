@@ -39,6 +39,12 @@ module.exports = (sequelize, Sequelize) => {
     buytype: {
       type: Sequelize.STRING
     },
+    volume: {
+      type: Sequelize.STRING
+    },
+    injung: {
+      type: Sequelize.STRING
+    },
     packageId: {
       type: Sequelize.INTEGER
     },
@@ -68,6 +74,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     centerId: {
       type: Sequelize.INTEGER
+    },
+    centername: {
+      type: Sequelize.STRING
     }
     
   },

@@ -56,18 +56,34 @@ exports.byuser = async (req, res) => {
             //console.log(childrentemp[i].createdAt)
             let day=dateFormat(childrentemp[i].createdAt, "yyyy-mm-dd");
             //console.log(day)
-            recommenders.push(
-                {
-                    id: childrentemp[i].id,
-                    tags: ['A'],
-                    name: childrentemp[i].userid + '/' + childrentemp[i].username,
-                    title: '매출 ',
-                    regdate: '등록날짜 '+day,
-                    memo: '',
-                    pid: childrentemp[i].parentId
-
-                }
-            )
+            if(i == 0 )
+            {
+                recommenders.push(
+                    {
+                        id: childrentemp[i].id,
+                        tags: ['A'],
+                        name: childrentemp[i].name + '/' + childrentemp[i].username,
+                        title: '매출 ',
+                        regdate: '등록날짜 '+day,
+                        memo: '',
+                    }
+                )
+            }
+            else
+            {
+                recommenders.push(
+                    {
+                        id: childrentemp[i].id,
+                        tags: ['A'],
+                        name: childrentemp[i].userid + '/' + childrentemp[i].username,
+                        title: '매출 ',
+                        regdate: '등록날짜 '+day,
+                        memo: '',
+                        pid: childrentemp[i].parentId
+                    }
+                )
+            }
+            
         }
 
         return res.send({recommenders:recommenders})
