@@ -149,7 +149,7 @@ exports.findAll = async (req, res) => {
         'maxbonus',
         'remainderbonus',
         'bonus',
-        'recovery',
+        'rc',
         'withdrawable',
         'spoint',
         'parentId',
@@ -243,7 +243,7 @@ exports.findAll = async (req, res) => {
     }
 };
 
-exports.findAndCountAll = (req, res) => {
+exports.findAndCountAll = async (req, res) => {
     console.log(req.query);
     const { page, size, username } = req.query;
     var condition = username
@@ -267,7 +267,7 @@ exports.findAndCountAll = (req, res) => {
 };
 
 // Find a single  with an id
-exports.findOne = (req, res) => {
+exports.findOne = async (req, res) => {
     const id = req.params.id;
 
     Member.findByPk(id)
@@ -282,45 +282,52 @@ exports.findOne = (req, res) => {
 };
 
 // Update a  by the id in the request
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
     const id = req.body.member.id;
 
     const { member } = req.body;
 
     console.log('update xxxxxxxxx', member);
 
-    const newmember = {
-        name: member.name,
-        sponsorid: member.sponsorid,
-        phone: member.phone,
-        email: member.email,
-        password: member.password,
-        centerid: member.centerid,
-    };
+    const spuser = await Member.findOne({
+        where: { sponsorid: member.sponsorid },
+        raw: true,
+    });
 
-    Member.update(newmember, {
-        where: { id: member.id },
-    })
-        .then((upmember) => {
-            if (upmember == 1) {
-                res.send([
-                    upmember,
-                    {
-                        message: 'Member was updated successfully.',
-                    },
-                ]);
-            } else {
-                res.send({
-                    message: `Cannot update Member with id=${id}. Maybe Tutorial was not found or req.body is empty!`,
-                });
-            }
+    if(spuser)
+    {
+        const newmember = {
+            name: member.name,
+            sponsorid: member.sponsorid,
+            parentId:spuser.id,
+            phone: member.phone,
+            email: member.email,
+            password: member.password,
+            centerid: member.centerid,
+        };
+    
+        await Member.update(newmember, {
+            where: { id: member.id },
         })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).send({
-                message: 'Error updating Member with id=' + id,
-            });
-        });
+    }
+    else
+    {
+        const newmember = {
+            name: member.name,
+            phone: member.phone,
+            email: member.email,
+            password: member.password,
+            centerid: member.centerid,
+        };
+    
+        await Member.update(newmember, {
+            where: { id: member.id },
+        })
+    }
+
+    await updateSponsorCnt();
+        
+    return res.send({message:'success'});
 };
 
 exports.updatepackage = async (req, res) => {
@@ -353,7 +360,7 @@ exports.updatepackage = async (req, res) => {
         bonus: 0,
         bonus_daily: 0,
         bonus_matching: 0,
-        recovery: 0,
+        rc: 0,
         withdrawable: 0,
         spoint: 0,
     };

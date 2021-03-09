@@ -19,6 +19,7 @@ exports.SponsorTree = async (id) => {
             'name',
             'sponsorid',
             'sponsorcount',
+            'balance',
             'createdAt',
         ],
         raw: true,
@@ -28,12 +29,14 @@ exports.SponsorTree = async (id) => {
         if (alluser[i].id == id) {
             currentuser = {
                 id: alluser[i].id,
+                userid:alluser[i].userid,
                 username: alluser[i].name,
                 name: alluser[i].userid,
                 title: alluser[i].userid,
                 parentId: alluser[i].parentId,
                 sponsorid: alluser[i].sponsorid,
                 sponsorcount: alluser[i].sponsorcount,
+                balance:alluser[i].balance,
                 createdAt: alluser[i].createdAt,
             }
         }
@@ -41,12 +44,14 @@ exports.SponsorTree = async (id) => {
         if (alluser[i].parentId == id) {
             firstChildren.push({
                 id: alluser[i].id,
+                userid:alluser[i].userid,
                 username: alluser[i].name,
                 name: alluser[i].userid,
                 title: alluser[i].userid,
                 parentId: alluser[i].parentId,
                 sponsorid: alluser[i].sponsorid,
                 sponsorcount: alluser[i].sponsorcount,
+                balance:alluser[i].balance,
                 createdAt: alluser[i].createdAt,
             });
         }
@@ -54,30 +59,34 @@ exports.SponsorTree = async (id) => {
         if (alluser[i].parentId > 0) {
             childrenNodes.push({
                 id: alluser[i].id,
+                userid:alluser[i].userid,
                 username: alluser[i].name,
                 name: alluser[i].userid,
                 title: alluser[i].userid,
                 parentId: alluser[i].parentId,
                 sponsorid: alluser[i].sponsorid,
                 sponsorcount: alluser[i].sponsorcount,
+                balance:alluser[i].balance,
                 createdAt: alluser[i].createdAt,
             });
         } else {
             // root node
             rootNodes.push({
                 id: alluser[i].id,
+                userid:alluser[i].userid,
                 username: alluser[i].name,
                 name: alluser[i].userid,
                 title: alluser[i].userid,
                 parentId: alluser[i].parentId,
                 sponsorid: alluser[i].sponsorid,
                 sponsorcount: alluser[i].sponsorcount,
+                balance:alluser[i].balance,
                 createdAt: alluser[i].createdAt,
             });
         }
     }
 
-    console.log('first children ',firstChildren)
+    //console.log('first children ',firstChildren)
     if (firstChildren.length > 0) {
         let a = new SponsorInfo(childrenNodes, id);
 
