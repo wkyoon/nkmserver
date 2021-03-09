@@ -60,6 +60,12 @@ module.exports = (sequelize, Sequelize) => {
     bonus: {
       type: Sequelize.DOUBLE
     },
+    bonus_daily: {
+      type: Sequelize.DOUBLE
+    },
+    bonus_matching: {
+      type: Sequelize.DOUBLE
+    },
     recovery: {
       type: Sequelize.DOUBLE
     },
