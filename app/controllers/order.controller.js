@@ -235,7 +235,7 @@ exports.update = async (req, res) => {
                     bonus: 0,
                     bonus_daily: 0,
                     bonus_matching: 0,
-                    recovery: 0,
+                    rc: 0,
                     withdrawable: 0,
                     spoint: 0, },
                 { where: { id: user.id } }
@@ -250,7 +250,7 @@ exports.update = async (req, res) => {
                     bonus: 0,
                     bonus_daily: 0,
                     bonus_matching: 0,
-                    recovery: 0,
+                    rc: 0,
                     withdrawable: 0,
                     spoint: 0,},
                 { where: { id: user.id } }
