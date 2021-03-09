@@ -66,7 +66,7 @@ module.exports = (sequelize, Sequelize) => {
     bonus_matching: {
       type: Sequelize.DOUBLE
     },
-    recovery: {
+    rc: {
       type: Sequelize.DOUBLE
     },
     withdrawable: {

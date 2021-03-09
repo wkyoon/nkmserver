@@ -55,6 +55,7 @@ require('./app/routes/members.routes')(app);
 require('./app/routes/package.routes')(app);
 
 require('./app/routes/sponsor.routes')(app);
+require('./app/routes/calculate.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3001;

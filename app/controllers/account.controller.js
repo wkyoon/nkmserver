@@ -50,7 +50,7 @@ exports.me = async (req, res) => {
                 bonus:user.bonus,
                 bonus_daily:user.bonus,
                 bonus_matching:user.bonus,
-                recovery:user.recovery,
+                rc:user.rc,
                 withdrawable:user.withdrawable,
                 spoint:user.spoint
 
@@ -104,7 +104,7 @@ exports.login = async (req, res) => {
                 bonus:user.bonus,
                 bonus_daily:user.bonus,
                 bonus_matching:user.bonus,
-                recovery:user.recovery,
+                rc:user.rc,
                 withdrawable:user.withdrawable,
                 spoint:user.spoint
 
@@ -171,7 +171,7 @@ exports.register = async (req, res) => {
         maxbonus: '0',
         remainderbonus: '0',
         bonus: '0',
-        recover : '0',
+        rc : '0',
         withdrawable : '0',
         spoint : '0'
     };
