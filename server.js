@@ -5,10 +5,10 @@ const cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:3000",
-  origin: "http://localhost:3002",
-  origin: "http://nkmcoin.tk:3000",
-  origin: "http://nkmcoin.tk:3002",
+  origin: [ "http://localhost:3000",
+  "http://localhost:3002",
+  "http://nkmcoin.tk:3000",
+  "http://nkmcoin.tk:3002"]
 };
 
 app.use(cors(corsOptions));
