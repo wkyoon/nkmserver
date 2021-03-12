@@ -7,8 +7,9 @@ const app = express();
 var corsOptions = {
   origin: [ "http://localhost:3000",
   "http://localhost:3002",
-  "http://coin-utop.tk",
-  "http://coin-utop.tk:3002",
+  "http://utop-coin.tk",
+  "http://www.utop-coin.tk",
+  "http://utop-coin.tk:3002"
 ]
 };
 
