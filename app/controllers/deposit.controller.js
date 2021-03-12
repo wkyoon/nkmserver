@@ -17,7 +17,7 @@ exports.listbyuser = async (req, res) => {
 
     try {
         const { authorization } = req.headers;
-        const { type } = req.query
+        const { type } = req.query;
 
         if (!authorization) {
             return res.status(401).send({
@@ -27,24 +27,25 @@ exports.listbyuser = async (req, res) => {
 
         const accessToken = authorization.split(' ')[1];
         const { uuid } = jwt.verify(accessToken, config.secret);
-        
+
         const user = await User.findOne({
             where: { uuid: uuid },
             raw: true,
         });
 
         if (!user) {
-            return res.status(400).send({ message: 'Invalid authorization token' });
+            return res
+                .status(400)
+                .send({ message: 'Invalid authorization token' });
         }
 
         const deposites = await Deposit.findAll({
             where: { userid: user.userid },
             order: [['createdAt', 'DESC']],
-            logging : false
-        })
+            logging: false,
+        });
 
-        return res.send({deposites});
-    
+        return res.send({ deposites });
     } catch (err) {
         console.error(err);
         return res.status(500).send({
@@ -53,37 +54,44 @@ exports.listbyuser = async (req, res) => {
     }
 };
 
+exports.create = async (req, res) => {
+    //console.log(req.body.deposit);
 
-exports.create = (req, res) => {
-    console.log(req.body.deposit);
+    const user = await User.findOne({
+        where: { userid: req.body.deposit.userid },
+        raw: true,
+        logging: false,
+    });
 
-    // Create a 
-    const deposit = {
-        userid: req.body.deposit.userid,
-        price: req.body.deposit.price,
-        txid: req.body.deposit.txid,
-        status:  req.body.deposit.status,
-    };
+    if (user) {
+        // Create a
+        const deposit = {
+            userid: req.body.deposit.userid,
+            price: req.body.deposit.price,
+            amount: req.body.deposit.amount,
+            txid: req.body.deposit.txid,
+            status: req.body.deposit.status,
+        };
 
-    Deposit.create(deposit)
-        .then((newDeposit) => {
-            res.send({ newDeposit });
-        })
-        .catch((err) => {
-            console.log(err)
-            res.status(500).send({
-                message:
-                    err.message ||
-                    'Some error occurred while creating the Tutorial.',
+        Deposit.create(deposit)
+            .then((newDeposit) => {
+                res.send({ newDeposit });
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(500).send({
+                    message:
+                        err.message ||
+                        'Some error occurred while creating the Tutorial.',
+                });
             });
-        });
+    }
 };
 
-
 exports.findAll = (req, res) => {
-    console.log('---- Deposit FindAll ---- GET');
+    //console.log('---- Deposit FindAll ---- GET');
     const query = req.query.id;
-    console.log('query', query);
+    //console.log('query', query);
 
     //  var condition = query ? { username: { [Op.like]: `%${query}%` } } : null;
 
@@ -134,8 +142,7 @@ exports.findAll = (req, res) => {
                         'Some error occurred while retrieving tutorials.',
                 });
             });
-    }
-    else if (query === 'cancel') {
+    } else if (query === 'cancel') {
         Deposit.findAll({
             where: { status: 'cancel' },
             order: [['createdAt', 'DESC']],
@@ -154,13 +161,10 @@ exports.findAll = (req, res) => {
     }
 };
 
-
 // call from admin
 exports.update = async (req, res) => {
     const { id, status } = req.body.deposit;
     console.log('----------update from admin --------------', req.body.deposit);
-
-    
 
     await Deposit.update(
         {
@@ -201,4 +205,13 @@ exports.delete = (req, res) => {
 };
 
 
+exports.coinvalue = async (req,res)  => {
 
+    console.log('deposit coinvalue');
+    const setting_nkm_price = await Setting.findOne({
+        where: { name: 'nkm_price' }, raw:true,logging:false
+    });
+
+    res.send({coinvalue:setting_nkm_price.value})
+
+};

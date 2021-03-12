@@ -36,7 +36,7 @@ exports.bonuslistbyuser = async (req, res) => {
         }
 
         const bonuses = await Bonus.findAll({
-            where: { userid: user.id, type: type },
+            where: { userid: user.userid, type: type },
             order: [['createdAt', 'DESC']],
             logging:false
         })

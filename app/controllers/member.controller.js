@@ -1,3 +1,6 @@
+
+var faker = require('faker');
+
 const { v4: uuidv4 } = require('uuid');
 const db = require('../models');
 const config = require('../config/auth.config');
@@ -5,6 +8,9 @@ const Member = db.user;
 const Settings = db.setting;
 const Center = db.center;
 const Order = db.order;
+const Deposit = db.deposit;
+const Withdraw = db.withdraw;
+const Bonus = db.bonus;
 const Op = db.Sequelize.Op;
 
 var SponsorInfo = require('../util/SponsorInfo');
@@ -56,6 +62,31 @@ async function updateSponsorCnt() {
     console.log('------------------> end updateSponsorCnt ');
 }
 
+const updateReommenderCount = async (sponsorid) => {
+    console.log('updateReommenderCount');
+
+    let recommendercount = await Member.count({
+        where: {
+            sponsorid: sponsorid,
+        },
+    });
+
+    console.log('recommendercount',recommendercount)
+
+    if(recommendercount<1)
+    {
+       
+        recommendercount = 0
+    }
+
+    await Member.update(
+        {
+            sponsorcount: recommendercount,
+        },
+        { where: { userid: sponsorid }, raw: true }
+    );
+};
+
 const getPagination = (page, size) => {
     const limit = size ? +size : 10;
     const offset = page ? page * limit : 0;
@@ -90,6 +121,7 @@ exports.create = async (req, res) => {
             userid: member.userid,
             uuid: uuidv4(),
             name: member.name,
+            role:'user',
             sponsorid: member.sponsorid,
             phone: member.phone,
             email: member.email,
@@ -109,6 +141,7 @@ exports.create = async (req, res) => {
                 userid: member.userid,
                 uuid: uuidv4(),
                 name: member.name,
+                role:'user',
                 sponsorid: member.sponsorid,
                 phone: member.phone,
                 email: member.email,
@@ -121,7 +154,8 @@ exports.create = async (req, res) => {
         }
     }
 
-    await updateSponsorCnt();
+    // ysw check need
+    //await updateSponsorCnt();
 
     res.send({ message: 'ok' });
 };
@@ -294,24 +328,21 @@ exports.update = async (req, res) => {
         raw: true,
     });
 
-    if(spuser)
-    {
+    if (spuser) {
         const newmember = {
             name: member.name,
             sponsorid: member.sponsorid,
-            parentId:spuser.id,
+            parentId: spuser.id,
             phone: member.phone,
             email: member.email,
             password: member.password,
             centerid: member.centerid,
         };
-    
+
         await Member.update(newmember, {
             where: { id: member.id },
-        })
-    }
-    else
-    {
+        });
+    } else {
         const newmember = {
             name: member.name,
             phone: member.phone,
@@ -319,15 +350,15 @@ exports.update = async (req, res) => {
             password: member.password,
             centerid: member.centerid,
         };
-    
+
         await Member.update(newmember, {
             where: { id: member.id },
-        })
+        });
     }
 
-    await updateSponsorCnt();
-        
-    return res.send({message:'success'});
+    //await updateSponsorCnt();
+
+    return res.send({ message: 'success' });
 };
 
 exports.updatepackage = async (req, res) => {
@@ -335,23 +366,23 @@ exports.updatepackage = async (req, res) => {
 
     console.log('updatepackage ', member);
 
-    let balance, maxbonus,buytype,volume,injung;
+    let balance, maxbonus, buytype, volume, injung;
     if (member.volume > 0) {
         balance = member.volume;
         volume = member.volume;
         injung = 0;
-        buytype = 'new'
+        buytype = 'new';
     } else {
         balance = member.injung;
         volume = 0;
         injung = member.injung;
-        buytype = 'injung'
+        buytype = 'injung';
     }
 
     maxbonus = balance * 2;
 
     const newmember = {
-        buytype:buytype,
+        buytype: buytype,
         volume: member.volume,
         injung: member.injung,
         balance: balance,
@@ -370,31 +401,27 @@ exports.updatepackage = async (req, res) => {
         raw: true,
     });
 
-    // find order list 
+    // find order list
     const order = await Order.findOne({
         where: { userid: member.userid },
         raw: true,
     });
 
-    if(!order)
-    {
+    if (!order) {
         const neworder = {
             userid: member.userid,
-            price:balance,
+            price: balance,
             buytype: buytype,
             status: 'active',
         };
         await Order.create(neworder);
-    }
-    else
-    {
+    } else {
         const neworder = {
-            price:balance,
+            price: balance,
             buytype: buytype,
             status: 'active',
         };
-        await Order.update(neworder,{ where: { id: order.id },
-            raw: true});
+        await Order.update(neworder, { where: { id: order.id }, raw: true });
     }
 
     return res.send({ message: 'Member was updated successfully.' });
@@ -813,4 +840,218 @@ exports.smscheck02 = (req, res) => {
     //   });
     // });
     // // create sms db
+};
+
+// ==============
+
+exports.addMember100 = async (req,res) => {
+
+    console.log('addMember100');
+
+    for(let i = 0 ; i < 100; i++)
+    {
+        const userid ='test'+faker.random.number();
+        //const userid = faker.internet.userName();
+        const name = faker.name.findName();
+        const phone = faker.phone.phoneNumber('010########');
+        //faker.phone.phoneNumber('0165#######')
+        const email = faker.internet.email();
+        const newmember = {
+            userid: userid,
+            uuid: uuidv4(),
+            name: name,
+            role:'user',
+            sponsorid: 'admin',
+            sponsorcount:'0',
+            parentId:'0',
+            phone:phone,
+            email: email,
+            password: '1234',
+            centerid: '1',
+            centername: '본사',
+        };
+        console.log(newmember);
+        try {
+            await Member.create(newmember);
+        }
+        catch(err)
+        {
+            console.log(err)
+        }
+        
+    
+    }
+
+  res.send({message: 'success'});
+
+
+};
+
+exports.defaultOrderSet = async (req, res) => {
+    console.log('defaultOrderSet');
+
+    Order.destroy({ truncate: true, cascade: false });
+
+    // truncate orders
+    // const neworder = {
+    //     userid: member.userid,
+    //     price:balance,
+    //     buytype: buytype,
+    //     status: 'active',
+    // };
+    // await Order.create(neworder);
+
+    const newmember = {
+        buytype: 'new',
+        volume: '1000',
+        injung: '0',
+        balance: '1000',
+        maxbonus: '2000',
+        remainderbonus: '2000',
+        bonus: 0,
+        bonus_daily: 0,
+        bonus_matching: 0,
+        rc: 0,
+        withdrawable: 0,
+        spoint: 0,
+    };
+
+    const alluserids = await Member.findAll({
+        attributes: ['id', 'userid'],
+        raw: true,
+        logging: false,
+    });
+
+    var ids = [];
+
+    for (let i = 0; i < alluserids.length; i++) {
+        ids.push(alluserids[i].id);
+
+        const neworder = {
+            userid: alluserids[i].userid,
+            price: '1000',
+            buytype: 'new',
+            status: 'active',
+        };
+        await Order.create(neworder);
+    }
+
+    console.log(ids);
+
+    await Member.update(newmember, { where: { id: ids }, raw: true });
+    res.send([
+        {
+            message: 'Members was updated successfully.',
+        },
+    ]);
+};
+
+exports.makeBTree = async (req, res) => {
+    console.log('makeBTree');
+
+    const alluser = await Member.findAll({
+        attributes: ['id', 'userid'],
+        order: [['id', 'ASC']],
+        raw: true,
+        logging: false,
+    });
+
+    const maxlength = alluser.length;
+
+    // let max_depth = 0;
+
+    // let temp_sum = 0;
+    // for (let i = 0; i < 15; i++) {
+    //     let temp_depth = Math.pow(2, i);
+    //     temp_sum = temp_sum + temp_depth;
+    //     console.log(i, temp_depth, temp_sum);
+
+    //     if (maxlength < temp_sum) {
+    //         max_depth = i;
+    //         break;
+    //     }
+    // }
+
+    // console.log('allusers', maxlength);
+    // console.log('max_depth', max_depth);
+
+    for (let i = 0; i < maxlength; i++) {
+        let parentId = Math.floor(alluser[i].id / 2);
+
+        if (i == 0) {
+            await Member.update(
+                { sponsorid: 'admin', parentId: 0,sponsorcount:0 },
+                { where: { id: alluser[i].id }, raw: true }
+            );
+        } else {
+            //console.log(alluser[i].id, parentId, alluser[parentId - 1].id);
+            await Member.update(
+                {
+                    sponsorid: alluser[parentId - 1].userid,
+                    parentId: alluser[parentId - 1].id,
+                    sponsorcount:0
+                },
+                { where: { id: alluser[i].id }, raw: true }
+            );
+
+            await updateReommenderCount(alluser[parentId - 1].userid);
+        }
+
+        //console.log(alluser[i].id,parentId);
+        //        console.log('user info',alluser[i].id,alluser[i].userid);
+    }
+
+    res.send([
+        {
+            message: 'Members was updated successfully.',
+        },
+    ]);
+};
+
+exports.defaultOrders = async (req, res) => {
+    await Order.destroy({ truncate: true, cascade: false });
+
+    res.send([
+        {
+            message: 'Order was updated successfully.',
+        },
+    ]);
+};
+
+exports.defaultWithdraws = async (req, res) => {
+    await Withdraw.destroy({ truncate: true, cascade: false });
+    res.send([
+        {
+            message: 'Withdraw was updated successfully.',
+        },
+    ]);
+};
+
+exports.defaultDeposits = async (req, res) => {
+    await Deposit.destroy({ truncate: true, cascade: false });
+    res.send([
+        {
+            message: 'Deposit was updated successfully.',
+        },
+    ]);
+};
+
+exports.defaultCalculates = async (req, res) => {
+    await Bonus.destroy({ truncate: true, cascade: false });
+
+    res.send([
+        {
+            message: 'Bonus was updated successfully.',
+        },
+    ]);
+};
+
+exports.defaultUsers = async (req, res) => {
+    await Member.destroy({ truncate: true, cascade: false });
+
+    res.send([
+        {
+            message: 'User was updated successfully.',
+        },
+    ]);
 };

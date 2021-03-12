@@ -11,7 +11,6 @@ module.exports = (sequelize, Sequelize) => {
         },
         txid: {
             type: Sequelize.STRING,
-            unique: true
         },
         status:{
             type: Sequelize.STRING

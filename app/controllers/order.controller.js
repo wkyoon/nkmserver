@@ -38,6 +38,7 @@ exports.orderlistbyuser = async (req, res) => {
         const orders = await Order.findAll({
             where: { userid: user.userid },
             order: [['createdAt', 'DESC']],
+            raw:true,
             logging: false,
         });
 

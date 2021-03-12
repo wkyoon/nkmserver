@@ -199,26 +199,71 @@ exports.update = async (req, res) => {
 
     const { id, status } = req.body.withdraw;
 
-    const orgwithdraw = await Withdraw.findByPk(id);
+    const orgwithdraw = await Withdraw.findByPk(id,{raw:true,logging:false});
 
     if (orgwithdraw.status === status) {
         res.send({
             message: 'nothing change',
         });
-    } else {
-        if (orgwithdraw.status === 'confirm') {
-            // request
-        } else if (status === 'cancel') {
-        }
-        await Withdraw.update(
-            {
-                status: status,
-            },
-            {
-                where: { id: id },
-                raw: true,
+
+    } else if (orgwithdraw.status === 'request') {
+
+        if (status === 'confirm') {
+            
+            // await Withdraw.update({status: status},
+            // { where: { id: id },raw: true,logging:false}
+            // );
+
+            // 사용자의 withdrawable 을 차감
+            const user = await User.findOne({
+                where: { userid: orgwithdraw.userid },
+                raw: true,logging:false
             });
+
+            //console.log('org info',orgwithdraw)
+            console.log('user info',user)
+            let user_withdrawable = user.withdrawable - orgwithdraw.usd;
+            console.log('user_withdrawable info',user_withdrawable)
+            if(user_withdrawable>0)
+            {
+                await User.update(
+                    {
+                        withdrawable: user_withdrawable,
+                    },
+                    { where: { id: user.id }, raw: true, logging: false }
+                );
+
+                await Withdraw.update({status: status},
+                    { where: { id: id },raw: true,logging:false}
+                    );
+
+            }
+            else
+            {
+                return res.send({ message: 'fail' });
+                
+            }
+
+          
+
+
         }
-    
+        else{
+            await Withdraw.update({status: status},
+                { where: { id: id },raw: true,logging:false}
+                );
+        }
+
+        res.send({ message: 'ok' });
+
+    } else if (orgwithdraw.status === 'confirm') {
+
+        res.send({
+            message: 'nothing change',
+        });
+        return;
+       
+    }
+
     res.send({ message: 'ok' });
 };

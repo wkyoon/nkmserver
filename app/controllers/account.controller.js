@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../models');
 const config = require('../config/auth.config');
 const User = db.user;
+const Bonus = db.bonus;
 const Op = db.Sequelize.Op;
 
 var jwt = require('jsonwebtoken');
@@ -19,7 +20,8 @@ exports.me = async (req, res) => {
         }
 
         const accessToken = authorization.split(' ')[1];
-        //console.log(accessToken);
+        console.log(accessToken);
+
         const { uuid } = jwt.verify(accessToken, config.secret);
         //console.log('uuid',uuid);
         
@@ -32,7 +34,11 @@ exports.me = async (req, res) => {
         if (!user) {
             return res.status(400).send({ message: 'Invalid authorization token' });
         }
+        const bonus_daily =  await Bonus.sum('bonus', { where: { type: 'daily',userid:user.userid },raw:true});
+        const bonus_matching =  await Bonus.sum('bonus', { where: { type: 'matching',userid:user.userid },raw:true});
 
+        // console.log('bonus_daily ---------',bonus_daily)
+        // console.log('bonus_matching ---------',bonus_matching)
         return res.send({
             user: {
                 id: user.id,
@@ -47,9 +53,9 @@ exports.me = async (req, res) => {
                 balance:user.balance,
                 maxbonus:user.maxbonus,
                 remainderbonus:user.remainderbonus,
-                bonus:user.bonus,
-                bonus_daily:user.bonus,
-                bonus_matching:user.bonus,
+                bonus:(bonus_daily+bonus_matching),
+                bonus_daily:bonus_daily,
+                bonus_matching:bonus_matching,
                 rc:user.rc,
                 withdrawable:user.withdrawable,
                 spoint:user.spoint
@@ -73,6 +79,7 @@ exports.login = async (req, res) => {
         const user = await User.findOne({
             where: { userid: userid },
             raw: true,
+            logging:false
         });
     
         if (!user) {
@@ -87,6 +94,11 @@ exports.login = async (req, res) => {
             expiresIn: 86400,
         });
 
+        const bonus_daily =  await Bonus.sum('bonus', { where: { type: 'daily',userid:user.userid },raw:true});
+        const bonus_matching =  await Bonus.sum('bonus', { where: { type: 'matching',userid:user.userid },raw:true});
+
+        // console.log('bonus_daily ---------',bonus_daily)
+        // console.log('bonus_matching ---------',bonus_matching)
         return res.send({
             accessToken,
             user: {
@@ -101,13 +113,12 @@ exports.login = async (req, res) => {
                 balance:user.balance,
                 maxbonus:user.maxbonus,
                 remainderbonus:user.remainderbonus,
-                bonus:user.bonus,
-                bonus_daily:user.bonus,
-                bonus_matching:user.bonus,
+                bonus:(bonus_daily+bonus_matching),
+                bonus_daily:bonus_daily,
+                bonus_matching:bonus_matching,
                 rc:user.rc,
                 withdrawable:user.withdrawable,
                 spoint:user.spoint
-
               }
         })
 
@@ -125,7 +136,7 @@ exports.register = async (req, res) => {
 
     const user = await User.findOne({
         where: { userid: userid },
-        raw: true,
+        raw: true,logging:false
     });
 
     if (user) {

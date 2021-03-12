@@ -18,9 +18,14 @@ module.exports = function(app) {
 
   app.post(basepath+'updatebonusmatching',controller.updatebonusmatching);
 
+
+  app.post(basepath+'listbyday',controller.listbyday);
+
   app.post(basepath+'listdailybyday',controller.listdailybyday);
 
   app.post(basepath+'listmatchingybyday',controller.listmatchingybyday);
+
+  app.post(basepath+'periodauto',controller.periodauto);
 
 
   

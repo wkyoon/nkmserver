@@ -23,5 +23,8 @@ module.exports = function(app) {
 
   app.post(basepath+"remove", controller.delete);
 
+  app.post(basepath+"coinvalue", controller.coinvalue);
+  
+
             
 };

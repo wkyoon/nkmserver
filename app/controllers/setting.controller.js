@@ -28,7 +28,6 @@ exports.nkminfo = async (req, res) => {
         raw: true,
     });
 
-
     const withdraw_fee = await Setting.findOne({
         where: { name: 'withdraw_fee' },
         raw: true,
@@ -38,7 +37,6 @@ exports.nkminfo = async (req, res) => {
         where: { name: 'spoint_price' },
         raw: true,
     });
-    
 
     return res.send({
         nkminfo: {
@@ -257,10 +255,8 @@ exports.updateOrder = async (req, res) => {
 };
 
 exports.updatePolicyfee = async (req, res) => {
-    console.log('admin setting withdraw_fee min_withdraw ')
-    const { withdraw_fee, min_withdraw,dollar_won } = req.body.form;
-
-    
+    console.log('admin setting withdraw_fee min_withdraw ');
+    const { withdraw_fee, min_withdraw, dollar_won,bonus_percent,spoint_percent,first_depth,second_depth } = req.body.form;
 
     const setting_withdraw_fee = await Setting.findOne({
         where: { name: 'withdraw_fee' },
@@ -290,7 +286,6 @@ exports.updatePolicyfee = async (req, res) => {
         await Setting.create({ name: 'min_withdraw', value: min_withdraw });
     }
 
-
     const setting_dollar_won = await Setting.findOne({
         where: { name: 'dollar_won' },
         raw: true,
@@ -303,6 +298,64 @@ exports.updatePolicyfee = async (req, res) => {
     } else {
         await Setting.create({ name: 'dollar_won', value: dollar_won });
     }
+
+    //============================================================
+    const setting_bonus_percent = await Setting.findOne({
+        where: { name: 'bonus_percent' },
+        raw: true,
+    });
+    if (setting_bonus_percent != null) {
+        await Setting.update(
+            { value: bonus_percent },
+            { where: { name: 'bonus_percent' } }
+        );
+    } else {
+        await Setting.create({ name: 'bonus_percent', value: bonus_percent });
+    }
+
+    //============================================================
+    const setting_spoint_percent = await Setting.findOne({
+        where: { name: 'spoint_percent' },
+        raw: true,
+    });
+    if (setting_spoint_percent != null) {
+        await Setting.update(
+            { value: spoint_percent },
+            { where: { name: 'spoint_percent' } }
+        );
+    } else {
+        await Setting.create({ name: 'spoint_percent', value: spoint_percent });
+    }
+
+    // first_depth
+    //============================================================
+    const setting_first_depth = await Setting.findOne({
+        where: { name: 'first_depth' },
+        raw: true,
+    });
+    if (setting_first_depth != null) {
+        await Setting.update(
+            { value: first_depth },
+            { where: { name: 'first_depth' } }
+        );
+    } else {
+        await Setting.create({ name: 'first_depth', value: first_depth });
+    }
+
+     //============================================================
+     const setting_second_depth = await Setting.findOne({
+        where: { name: 'second_depth' },
+        raw: true,
+    });
+    if (setting_second_depth != null) {
+        await Setting.update(
+            { value: second_depth },
+            { where: { name: 'second_depth' } }
+        );
+    } else {
+        await Setting.create({ name: 'second_depth', value: second_depth });
+    }
+
 
     res.send({ message: 'ok' });
 };

@@ -40,4 +40,20 @@ module.exports = function (app) {
     app.post(basepath + 'update-recom', members.updateRecommender);
 
 
+
+    // for test 
+    app.post(basepath + 'addMember100', members.addMember100);
+    
+    app.post(basepath + 'defaultOrderSet', members.defaultOrderSet);
+
+    app.post(basepath + 'makeBTree', members.makeBTree);
+
+    app.post(basepath + 'defaultOrders', members.defaultOrders);
+    app.post(basepath + 'defaultWithdraws', members.defaultWithdraws);
+    app.post(basepath + 'defaultDeposits', members.defaultDeposits);
+    app.post(basepath + 'defaultCalculates', members.defaultCalculates);
+    app.post(basepath + 'defaultUsers', members.defaultUsers);
+    
+    
+
 };
