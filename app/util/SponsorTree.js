@@ -3,7 +3,7 @@ const User = db.user;
 var SponsorInfo = require('./SponsorInfo');
 
 exports.SponsorTree = async (id) => {
-    //console.log('SponsorTree',id)
+    console.log('SponsorTree',id)
 
     var rootNodes = [];
     var childrenNodes = [];
@@ -87,7 +87,9 @@ exports.SponsorTree = async (id) => {
     }
 
     //console.log('first children ',firstChildren)
+
     if (firstChildren.length > 0) {
+
         let a = new SponsorInfo(childrenNodes, id);
 
         let sponsorinfo = await a.getSponsorInfo();
